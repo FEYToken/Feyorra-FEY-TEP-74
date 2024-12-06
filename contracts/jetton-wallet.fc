@@ -185,6 +185,9 @@
 () cross_chain_transfer(slice in_msg_body, slice sender_address, int msg_value) impure inline_ref {
     (int status, int balance, slice owner_address, slice jetton_master_address) = load_data();
 
+    int outgoing_transfers_unlocked = ((status & 1) == 0);
+    throw_unless(error::contract_locked, outgoing_transfers_unlocked);
+
     throw_unless(error::not_owner, equal_slices_bits(owner_address, sender_address));
 
     int query_id = in_msg_body~load_query_id();
