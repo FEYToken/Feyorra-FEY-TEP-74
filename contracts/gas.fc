@@ -29,7 +29,7 @@ const JETTON_WALLET_CELLS = 20;
 ;; StateInit and AccountStorage (https://github.com/ton-blockchain/ton/blob/master/crypto/block/block.tlb)
 ;; we count bits as if balances are max possible
 ;;- `JETTON_WALLET_INITSTATE_BITS` [/sandbox_tests/StateInit.spec.ts#L95](L95)
-const JETTON_WALLET_INITSTATE_BITS  = 9613;
+const JETTON_WALLET_INITSTATE_BITS  = 9691;
 ;;- `JETTON_WALLET_INITSTATE_CELLS` [/sandbox_tests/StateInit.spec.ts#L95](L95)
 const JETTON_WALLET_INITSTATE_CELLS = 20;
 
@@ -59,7 +59,7 @@ const RECEIVE_BURN_GAS_CONSUMPTION = 6945;
 const CROSS_CHAIN_TRANSFER_NOTIFICATION_BITS = 1458; ;; body = 32+64+124+(3+8+256)+(3+8+256)+64+640 chain selector + external address
 const CROSS_CHAIN_TRANSFER_NOTIFICATION_CELLS = 2; ;; body + externbal address
 
-const SEND_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 6446;
+const SEND_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 6542;
 const RECEIVE_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 8386;
 
 
