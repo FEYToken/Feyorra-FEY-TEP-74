@@ -46,3 +46,4 @@ const op::withdraw_ton = 0x37726bdb;
 const error::invalid_external_address = 50;
 const error::invalid_chain_selector = 51;
 const error::not_enough_fees_for_cross_chain_transfer = 52;
+const error::invalid_mint_query_id = 53;

@@ -9,7 +9,7 @@
 #include "gas.fc";
 
 ;; storage#_ total_supply:Coins admin_address:MsgAddress next_admin_address:MsgAddress jetton_wallet_code:^Cell metadata:^Cell = Storage;
-(int, slice, slice, cell, cell, cell) load_data() inline {
+(int, slice, slice, cell, cell, cell, int) load_data() inline {
     slice ds = get_data().begin_parse();
 
     var data = (
@@ -18,7 +18,8 @@
         ds~load_msg_addr(), ;; next_admin_address
         ds~load_ref(),  ;; jetton_wallet_code
         ds~load_ref(),  ;; metadata url (contains snake slice without 0x0 prefix)
-        ds~load_dict()  ;; cross chain fees
+        ds~load_dict(),  ;; cross chain fees
+        ds~load_query_id()  ;; last executed mint query id
     );
 
     ds.end_parse();
@@ -26,7 +27,7 @@
     return data;
 }
 
-() save_data(int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees) impure inline {
+() save_data(int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) impure inline {
     set_data(
         begin_cell()
         .store_coins(total_supply)
@@ -35,6 +36,7 @@
         .store_ref(jetton_wallet_code)
         .store_ref(metadata)
         .store_dict(cross_chain_fees)
+        .store_query_id(last_executed_mint_query_id)
         .end_cell()
     );
 }
@@ -84,8 +86,8 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         }
         in_msg_body~skip_query_id();
         int jetton_amount = in_msg_body~load_coins();
-        (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees) = load_data();
-        save_data(total_supply - jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees);
+        (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) = load_data();
+        save_data(total_supply - jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees, max(last_executed_mint_query_id - 1, 0));
         return ();
     }
 
@@ -95,9 +97,10 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
 
     (int op, int query_id) = in_msg_body~load_op_and_query_id();
 
-    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees) = load_data();
+    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) = load_data();
 
     if (op == op::mint) {
+        throw_unless(error::invalid_mint_query_id, last_executed_mint_query_id + 1 == query_id);
         throw_unless(error::not_owner, equal_slices_bits(sender_address, admin_address));
         slice to_address = in_msg_body~load_msg_addr();
         check_same_workchain(to_address);
@@ -124,7 +127,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         check_amount_is_enough_to_transfer(ton_amount, forward_ton_amount, fwd_fee);
 
         send_to_jetton_wallet(to_address, jetton_wallet_code, ton_amount, master_msg, TRUE);
-        save_data(total_supply + jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees);
+        save_data(total_supply + jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees, query_id);
         return ();
     }
 
@@ -135,7 +138,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         throw_unless(error::not_valid_wallet,
             equal_slices_bits(calculate_user_jetton_wallet_address(from_address, my_address(), jetton_wallet_code), sender_address)
         );
-        save_data(total_supply - jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees);
+        save_data(total_supply - jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees, last_executed_mint_query_id);
         slice response_address = in_msg_body~load_msg_addr();
         in_msg_body.end_parse();
 
@@ -188,14 +191,14 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         throw_unless(error::not_owner, equal_slices_bits(sender_address, admin_address));
         next_admin_address = in_msg_body~load_msg_addr();
         in_msg_body.end_parse();
-        save_data(total_supply, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees);
+        save_data(total_supply, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees, last_executed_mint_query_id);
         return ();
     }
 
     if (op == op::claim_admin) {
         in_msg_body.end_parse();
         throw_unless(error::not_owner, equal_slices_bits(sender_address, next_admin_address));
-        save_data(total_supply, next_admin_address, address_none(), jetton_wallet_code, metadata, cross_chain_fees);
+        save_data(total_supply, next_admin_address, address_none(), jetton_wallet_code, metadata, cross_chain_fees, last_executed_mint_query_id);
         return ();
     }
 
@@ -247,7 +250,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         cell new_metadata = in_msg_body~load_ref();
         in_msg_body.end_parse();
 
-        save_data(total_supply, admin_address, next_admin_address, jetton_wallet_code, new_metadata, cross_chain_fees);
+        save_data(total_supply, admin_address, next_admin_address, jetton_wallet_code, new_metadata, cross_chain_fees, last_executed_mint_query_id);
         return ();
     }
 
@@ -257,7 +260,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         cell updated_fees = in_msg_body~load_dict();
         in_msg_body.end_parse();
 
-        save_data(total_supply, admin_address, next_admin_address, jetton_wallet_code, metadata, updated_fees);
+        save_data(total_supply, admin_address, next_admin_address, jetton_wallet_code, metadata, updated_fees, last_executed_mint_query_id);
 
         ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
         var msg = begin_cell()
@@ -287,7 +290,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
 
         throw_unless(error::not_enough_fees_for_cross_chain_transfer, amount_to_return >= 0);
 
-        save_data(total_supply - jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees);
+        save_data(total_supply - jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees, last_executed_mint_query_id);
 
         if ((~ is_address_none(response_address)) & (amount_to_return > 0)) {
             ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
@@ -338,21 +341,26 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
 }
 
 (int, int, slice, cell, cell) get_jetton_data() method_id {
-    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees) = load_data();
+    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) = load_data();
     return (total_supply, TRUE, admin_address, metadata, jetton_wallet_code);
 }
 
 slice get_wallet_address(slice owner_address) method_id {
-    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees) = load_data();
+    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) = load_data();
     return calculate_user_jetton_wallet_address(owner_address, my_address(), jetton_wallet_code);
 }
 
 slice get_next_admin_address() method_id {
-    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees) = load_data();
+    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) = load_data();
     return next_admin_address;
 }
 
 int get_cross_chain_fees(int chain_selector) method_id {
-    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees) = load_data();
+    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) = load_data();
     return get_fees_by_chain_selector(cross_chain_fees, chain_selector);
+}
+
+int get_last_executed_mint_query_id() method_id {
+    (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) = load_data();
+    return last_executed_mint_query_id;
 }
