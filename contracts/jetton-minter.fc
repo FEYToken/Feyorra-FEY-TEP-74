@@ -87,7 +87,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         in_msg_body~skip_query_id();
         int jetton_amount = in_msg_body~load_coins();
         (int total_supply, slice admin_address, slice next_admin_address, cell jetton_wallet_code, cell metadata, cell cross_chain_fees, int last_executed_mint_query_id) = load_data();
-        save_data(total_supply - jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees, max(last_executed_mint_query_id - 1, 0));
+        save_data(total_supply - jetton_amount, admin_address, next_admin_address, jetton_wallet_code, metadata, cross_chain_fees, last_executed_mint_query_id);
         return ();
     }
 
