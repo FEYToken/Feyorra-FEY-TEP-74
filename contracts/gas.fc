@@ -20,8 +20,7 @@ const MIN_STORAGE_DURATION = 5 * 365 * 24 * 3600; ;; 5 years
 ;;Get calculated in a separate test file [/sandbox_tests/StateInit.spec.ts](StateInit.spec.ts)
 
 ;;- `JETTON_WALLET_BITS` [/sandbox_tests/StateInit.spec.ts#L92](L92)
-const JETTON_WALLET_BITS  = 9715;
-
+const JETTON_WALLET_BITS  = 9827;
 ;;- `JETTON_WALLET_CELLS`: [/sandbox_tests/StateInit.spec.ts#L92](L92)
 const JETTON_WALLET_CELLS = 20;
 
@@ -29,7 +28,7 @@ const JETTON_WALLET_CELLS = 20;
 ;; StateInit and AccountStorage (https://github.com/ton-blockchain/ton/blob/master/crypto/block/block.tlb)
 ;; we count bits as if balances are max possible
 ;;- `JETTON_WALLET_INITSTATE_BITS` [/sandbox_tests/StateInit.spec.ts#L95](L95)
-const JETTON_WALLET_INITSTATE_BITS  = 9691;
+const JETTON_WALLET_INITSTATE_BITS  = 9725;
 ;;- `JETTON_WALLET_INITSTATE_CELLS` [/sandbox_tests/StateInit.spec.ts#L95](L95)
 const JETTON_WALLET_INITSTATE_CELLS = 20;
 
@@ -59,8 +58,9 @@ const RECEIVE_BURN_GAS_CONSUMPTION = 7123;
 const CROSS_CHAIN_TRANSFER_NOTIFICATION_BITS = 1458; ;; body = 32+64+124+(3+8+256)+(3+8+256)+64+640 chain selector + external address
 const CROSS_CHAIN_TRANSFER_NOTIFICATION_CELLS = 2; ;; body + externbal address
 
-const SEND_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 6542;
+const SEND_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 6638;
 const RECEIVE_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 8764;
+const RECEIVE_BOUNCED_CROSS_CHAIN_TRANSFER_NOTIFICATION_GAS_CONSUMPTION = 2254;
 
 
 int calculate_jetton_wallet_min_storage_fee() inline {
@@ -100,5 +100,11 @@ int forward_init_state_overhead() inline {
     int jetton_wallet_gas_consumption = get_precompiled_gas_consumption();
     int send_cross_chain_transfer_gas_consumption = null?(jetton_wallet_gas_consumption) ? SEND_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION : jetton_wallet_gas_consumption;
 
-    throw_unless(error::not_enough_gas, msg_value > get_forward_fee(MY_WORKCHAIN, CROSS_CHAIN_TRANSFER_NOTIFICATION_BITS, CROSS_CHAIN_TRANSFER_NOTIFICATION_CELLS) + get_compute_fee(MY_WORKCHAIN, send_cross_chain_transfer_gas_consumption) + get_compute_fee(MY_WORKCHAIN, RECEIVE_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION));
+    throw_unless(
+        error::not_enough_gas,
+        msg_value > get_forward_fee(MY_WORKCHAIN, CROSS_CHAIN_TRANSFER_NOTIFICATION_BITS, CROSS_CHAIN_TRANSFER_NOTIFICATION_CELLS)
+          + get_compute_fee(MY_WORKCHAIN, send_cross_chain_transfer_gas_consumption)
+          + get_compute_fee(MY_WORKCHAIN, RECEIVE_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION)
+          + get_compute_fee(MY_WORKCHAIN, RECEIVE_BOUNCED_CROSS_CHAIN_TRANSFER_NOTIFICATION_GAS_CONSUMPTION)
+    );
 }
