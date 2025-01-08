@@ -197,6 +197,8 @@
     int chain_selector = in_msg_body~load_uint(CHAIN_SELECTOR_SIZE);
     cell ext_address = in_msg_body~load_ref(); ;; address on external chain
     slice ext_address_slice = ext_address.begin_parse();
+    throw_unless(error::invalid_external_address, ext_address_slice.slice_refs() == 0);
+
     in_msg_body.end_parse();
 
     int address_size = ext_address_slice.slice_bits();
