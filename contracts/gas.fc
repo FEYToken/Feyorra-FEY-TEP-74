@@ -11,56 +11,39 @@ const MIN_STORAGE_DURATION = 5 * 365 * 24 * 3600; ;; 5 years
 
 ;;## Minimal fees
 ;;
-;;- Transfer [/sandbox_tests/JettonWallet.spec.ts#L935](L935) `0.028627415` TON
-;;- Burn [/sandbox_tests/JettonWallet.spec.ts#L1185](L1185) `0.016492002` TON
+;;- Transfer [/sandbox_tests/JettonWallet.spec.ts#L935](L935) `0.028993415` TON
+;;- Burn [/sandbox_tests/JettonWallet.spec.ts#L1185](L1185) `0.016032001` TON
 
 
 ;;## Storage
-;;
-;;Get calculated in a separate test file [/sandbox_tests/StateInit.spec.ts](StateInit.spec.ts)
 
-;;- `JETTON_WALLET_BITS` [/sandbox_tests/StateInit.spec.ts#L92](L92)
-const JETTON_WALLET_BITS  = 9883;
-;;- `JETTON_WALLET_CELLS`: [/sandbox_tests/StateInit.spec.ts#L92](L92)
-const JETTON_WALLET_CELLS = 20;
+const JETTON_WALLET_BITS  = 1033;
+const JETTON_WALLET_CELLS = 3;
 
-;; difference in JETTON_WALLET_BITS/JETTON_WALLET_INITSTATE_BITS is difference in
-;; StateInit and AccountStorage (https://github.com/ton-blockchain/ton/blob/master/crypto/block/block.tlb)
-;; we count bits as if balances are max possible
-;;- `JETTON_WALLET_INITSTATE_BITS` [/sandbox_tests/StateInit.spec.ts#L95](L95)
-const JETTON_WALLET_INITSTATE_BITS  = 9781;
-;;- `JETTON_WALLET_INITSTATE_CELLS` [/sandbox_tests/StateInit.spec.ts#L95](L95)
-const JETTON_WALLET_INITSTATE_CELLS = 20;
+const JETTON_WALLET_INITSTATE_BITS  = 931;
+const JETTON_WALLET_INITSTATE_CELLS = 3;
 
 ;; jetton-wallet.fc#L163 - maunal bits counting
 const BURN_NOTIFICATION_BITS = 754; ;; body = 32+64+124+(3+8+256)+(3+8+256)
 const BURN_NOTIFICATION_CELLS = 1; ;; body always in ref
 
 ;;## Gas
-;;
-;;Gas constants are calculated in the main test suite.
-;;First the related transaction is found, and then it's
-;;resulting gas consumption is printed to the console.
 
-;;- `SEND_TRANSFER_GAS_CONSUMPTION` [/sandbox_tests/JettonWallet.spec.ts#L853](L853)
-const SEND_TRANSFER_GAS_CONSUMPTION    = 9371;
+const SEND_TRANSFER_GAS_CONSUMPTION    = 9465;
 
-;;- `RECEIVE_TRANSFER_GAS_CONSUMPTION` [/sandbox_tests/JettonWallet.spec.ts#L862](L862)
-const RECEIVE_TRANSFER_GAS_CONSUMPTION = 10353;
+const RECEIVE_TRANSFER_GAS_CONSUMPTION = 10455;
 
-;;- `SEND_BURN_GAS_CONSUMPTION` [/sandbox_tests/JettonWallet.spec.ts#L1154](L1154)
-const SEND_BURN_GAS_CONSUMPTION    = 5781;
+const SEND_BURN_GAS_CONSUMPTION    = 5891;
 
-;;- `RECEIVE_BURN_GAS_CONSUMPTION` [/sandbox_tests/JettonWallet.spec.ts#L1155](L1155)
 const RECEIVE_BURN_GAS_CONSUMPTION = 8287;
 
 ;; croschain transfer
 const CROSS_CHAIN_TRANSFER_NOTIFICATION_BITS = 1458; ;; body = 32+64+124+(3+8+256)+(3+8+256)+64+640 chain selector + external address
 const CROSS_CHAIN_TRANSFER_NOTIFICATION_CELLS = 2; ;; body + externbal address
 
-const SEND_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 6734;
-const RECEIVE_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 9946;
-const RECEIVE_BOUNCED_CROSS_CHAIN_TRANSFER_NOTIFICATION_GAS_CONSUMPTION = 2254;
+const SEND_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 6844;
+const RECEIVE_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 10846;
+const RECEIVE_BOUNCED_CROSS_CHAIN_TRANSFER_NOTIFICATION_GAS_CONSUMPTION = 2364;
 
 
 int calculate_jetton_wallet_min_storage_fee() inline {
@@ -83,7 +66,7 @@ int forward_init_state_overhead() inline {
         ;; 3 messages: wal1->wal2,  wal2->owner, wal2->response
         ;; but last one is optional (it is ok if it fails)
     fwd_count * fwd_fee +
-    forward_init_state_overhead() + ;; additional fwd fees related to initstate in iternal_transfer
+    forward_init_state_overhead() + ;; additional fwd fees related to init-state in internal_transfer
     get_compute_fee(MY_WORKCHAIN, send_transfer_gas_consumption) +
     get_compute_fee(MY_WORKCHAIN, receive_transfer_gas_consumption) +
     calculate_jetton_wallet_min_storage_fee() );
