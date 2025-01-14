@@ -2,7 +2,7 @@
 
 const int CROSS_CHAIN_REQUEST_ID_SIZE = 64; ;; first 8 bytes of request id
 const int CHAIN_SELECTOR_SIZE = 64;
-const int MAX_EXETRNAL_ADDRESS_SIZE = 640; ;; 80 bytes
+const int MAX_EXTERNAL_ADDRESS_SIZE = 640; ;; 80 bytes
 
 const int STATUS_SIZE = 4;
 

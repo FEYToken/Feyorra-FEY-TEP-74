@@ -23,7 +23,7 @@ const JETTON_WALLET_CELLS = 3;
 const JETTON_WALLET_INITSTATE_BITS  = 931;
 const JETTON_WALLET_INITSTATE_CELLS = 3;
 
-;; jetton-wallet.fc#L163 - maunal bits counting
+;; jetton-wallet.fc#L163 - manual bits counting
 const BURN_NOTIFICATION_BITS = 754; ;; body = 32+64+124+(3+8+256)+(3+8+256)
 const BURN_NOTIFICATION_CELLS = 1; ;; body always in ref
 
@@ -37,9 +37,9 @@ const SEND_BURN_GAS_CONSUMPTION    = 5891;
 
 const RECEIVE_BURN_GAS_CONSUMPTION = 8287;
 
-;; croschain transfer
+;; cross-chain transfer
 const CROSS_CHAIN_TRANSFER_NOTIFICATION_BITS = 1458; ;; body = 32+64+124+(3+8+256)+(3+8+256)+64+640 chain selector + external address
-const CROSS_CHAIN_TRANSFER_NOTIFICATION_CELLS = 2; ;; body + externbal address
+const CROSS_CHAIN_TRANSFER_NOTIFICATION_CELLS = 2; ;; body + external address
 
 const SEND_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 6844;
 const RECEIVE_CROSS_CHAIN_TRANSFER_GAS_CONSUMPTION = 10846;

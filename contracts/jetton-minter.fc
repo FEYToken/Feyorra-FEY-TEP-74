@@ -58,7 +58,7 @@ global (slice, slice) time_locked_admin_addresses;
     cell state_init = calculate_jetton_wallet_state_init(to_address, my_address(), jetton_wallet_code);
     slice to_wallet_address = calculate_jetton_wallet_address(state_init);
 
-    ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+    ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
     var msg = begin_cell()
     .store_msg_flags_and_address_none(BOUNCEABLE)
     .store_slice(to_wallet_address) ;; dest
@@ -190,7 +190,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         in_msg_body.end_parse();
 
         if (~ is_address_none(response_address)) {
-            ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+            ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
             var msg = begin_cell()
             .store_msg_flags_and_address_none(NON_BOUNCEABLE)
             .store_slice(response_address) ;; dest
@@ -213,7 +213,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         ? begin_cell().store_slice(owner_address).end_cell()
         : null();
 
-        ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+        ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
         var msg = begin_cell()
         .store_msg_flags_and_address_none(NON_BOUNCEABLE)
         .store_slice(sender_address)
@@ -331,7 +331,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
 
         save_data(total_supply, jetton_wallet_code, metadata, updated_fees, last_executed_mint_query_id);
 
-        ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+        ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
         var msg = begin_cell()
          .store_msg_flags_and_address_none(NON_BOUNCEABLE)
          .store_slice(sender_address) ;; dest
@@ -362,7 +362,7 @@ int get_fees_by_chain_selector(cell dict, int selector) impure inline {
         save_data(total_supply - jetton_amount, jetton_wallet_code, metadata, cross_chain_fees, last_executed_mint_query_id);
 
         if ((~ is_address_none(response_address)) & (amount_to_return > 0)) {
-            ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+            ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
             var msg = begin_cell()
             .store_msg_flags_and_address_none(NON_BOUNCEABLE)
             .store_slice(response_address) ;; dest

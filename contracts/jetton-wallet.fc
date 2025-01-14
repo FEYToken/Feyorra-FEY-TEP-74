@@ -71,7 +71,7 @@
     .store_slice(either_forward_payload)
     .end_cell();
 
-    ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+    ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
     cell msg = begin_cell()
     .store_msg_flags_and_address_none(BOUNCEABLE)
     .store_slice(to_wallet_address)
@@ -115,7 +115,7 @@
         .store_slice(either_forward_payload)
         .end_cell();
 
-        ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+        ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
         cell msg = begin_cell()
         .store_msg_flags_and_address_none(NON_BOUNCEABLE)
         .store_slice(owner_address)
@@ -130,7 +130,7 @@
         int to_leave_on_balance = my_ton_balance - msg_value + my_storage_due();
         raw_reserve(max(to_leave_on_balance, calculate_jetton_wallet_min_storage_fee()), RESERVE_AT_MOST);
 
-        ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+        ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
         cell msg = begin_cell()
         .store_msg_flags_and_address_none(NON_BOUNCEABLE)
         .store_slice(response_address)
@@ -167,7 +167,7 @@
     .store_slice(response_address)
     .end_cell();
 
-    ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+    ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
     cell msg = begin_cell()
     .store_msg_flags_and_address_none(BOUNCEABLE)
     .store_slice(jetton_master_address)
@@ -202,12 +202,12 @@
     in_msg_body.end_parse();
 
     int address_size = ext_address_slice.slice_bits();
-    throw_unless(error::invalid_external_address, (address_size >= 1) & (address_size <= MAX_EXETRNAL_ADDRESS_SIZE));
+    throw_unless(error::invalid_external_address, (address_size >= 1) & (address_size <= MAX_EXTERNAL_ADDRESS_SIZE));
 
     balance -= jetton_amount;
     throw_unless(error::balance_error, balance >= 0);
 
-    ;; see burn_notification TL-B layout in jetton.tlb
+    ;; see cross_chain_transfer_notification TL-B layout in jetton.tlb
     cell msg_body = begin_cell()
     .store_op(op::cross_chain_transfer_notification)
     .store_query_id(query_id)
@@ -218,7 +218,7 @@
     .store_ref(ext_address)
     .end_cell();
 
-    ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L733
+    ;; build MessageRelaxed, see TL-B layout in stdlib.fc#L746
     cell msg = begin_cell()
     .store_msg_flags_and_address_none(BOUNCEABLE)
     .store_slice(jetton_master_address)

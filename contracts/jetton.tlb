@@ -149,3 +149,28 @@ change_metadata#cb862902
   query_id:uint64
   metadata:Cell
   = JettonMinterMsg;
+
+//=======================================================================
+// Cross-Chain
+
+cross_chain_transfer#3d62cd4b
+  query_id:uint64
+  amount:Coins
+  response_destination:MsgAddress
+  chain_selector:uint64
+  external_address:^Cell
+  = JettonMsg;
+
+cross_chain_transfer_notification#e7f6f077
+  query_id:uint64
+  amount:Coins
+  sender:MsgAddress
+  response_destination:MsgAddress
+  chain_selector:uint64
+  external_address:^Cell
+  = JettonMinterMsg;
+
+update_fees#74ff96f3
+  query_id:uint64
+  fees:HashmapE 64 Coins
+  = JettonMinterMsg;
